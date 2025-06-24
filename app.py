@@ -1,32 +1,46 @@
 import streamlit as st
 import pandas as pd
+from textblob import TextBlob
 
-# Load the dataset
+# Load dataset
 @st.cache_data
 def load_data():
-    df = pd.read_csv("StemmingJumbo (2).csv")  # Pastikan file ini ada di root repo
+    df = pd.read_csv("StemmingJumbo (2).csv")
     return df
+
+# Analisis sentimen
+def analyze_sentiment(text):
+    try:
+        polarity = TextBlob(str(text)).sentiment.polarity
+        if polarity > 0:
+            return "Positif"
+        elif polarity < 0:
+            return "Negatif"
+        else:
+            return "Netral"
+    except:
+        return "Netral"
+
+# App
+st.title("📊 Aplikasi Analisis Sentimen Otomatis")
+st.caption("Deteksi otomatis sentimen dari data komentar/teks.")
 
 df = load_data()
 
-st.title("📊 Sentimen Analysis Viewer")
-st.write("Gunakan filter di bawah ini untuk melihat data berdasarkan sentimen.")
+# Pilih kolom teks
+text_columns = df.select_dtypes(include='object').columns.tolist()
+selected_column = st.selectbox("Pilih kolom teks untuk analisis sentimen:", text_columns)
 
-# Deteksi nama kolom sentimen
-sentiment_column = None
-for col in df.columns:
-    if 'sentimen' in col.lower():
-        sentiment_column = col
-        break
+# Tambah kolom sentimen
+df['Sentimen'] = df[selected_column].apply(analyze_sentiment)
 
-if sentiment_column is None:
-    st.error("Kolom sentimen tidak ditemukan di file CSV.")
+# Filter
+sentiment_option = st.radio("Tampilkan data dengan sentimen:", ["Semua", "Positif", "Netral", "Negatif"])
+
+if sentiment_option != "Semua":
+    filtered_df = df[df['Sentimen'] == sentiment_option]
 else:
-    # Pilihan filter
-    sentiments = df[sentiment_column].unique().tolist()
-    selected_sentiment = st.selectbox("Pilih sentimen", sentiments)
+    filtered_df = df
 
-    # Filter data
-    filtered_data = df[df[sentiment_column] == selected_sentiment]
-    st.write(f"Menampilkan {len(filtered_data)} data dengan sentimen '{selected_sentiment}':")
-    st.dataframe(filtered_data)
+st.write(f"Jumlah data: {len(filtered_df)}")
+st.dataframe(filtered_df)
