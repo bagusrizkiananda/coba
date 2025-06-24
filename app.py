@@ -1,7 +1,7 @@
 import pandas as pd
 
 # Load data
-file_path = 'sentiment_analysis_results.csv'
+df = pd.read_csv('sentiment_with_labels.csv')
 df = pd.read_csv(file_path)
 
 # Lexicon Anda
