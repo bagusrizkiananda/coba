@@ -4,7 +4,7 @@ import pandas as pd
 file_path = 'sentiment_analysis_results.csv'
 df = pd.read_csv(file_path)
 
-# Lexicon yang Anda berikan
+# Lexicon Anda
 sentiment_lexicon = {
     'bagus': 1, 'baik': 1, 'suka': 1, 'cinta': 1, 'menarik': 1, 'seru': 1,
     'hebat': 1, 'lucu': 1, 'tertawa': 1, 'senang': 1, 'puas': 1, 'rekomen': 1,
@@ -14,12 +14,13 @@ sentiment_lexicon = {
     'tidak sangat': -1
 }
 
-# Fungsi sederhana untuk analisis sentimen
+# Fungsi dengan substring matching
 def analyze_sentiment(text):
     score = 0
-    for word in text.split():
-        if word in sentiment_lexicon:
-            score += sentiment_lexicon[word]
+    text = str(text).lower()  # Pastikan teks lowercase
+    for phrase, value in sentiment_lexicon.items():
+        if phrase in text:
+            score += value
     if score > 0:
         return 'positive'
     elif score < 0:
@@ -27,8 +28,12 @@ def analyze_sentiment(text):
     else:
         return 'neutral'
 
-# Terapkan ke data
+# Terapkan fungsi ke kolom normalized_text
 df['sentiment_label'] = df['normalized_text'].apply(analyze_sentiment)
+
+# Hitung jumlah masing-masing label
+sentiment_counts = df['sentiment_label'].value_counts()
+print(sentiment_counts)
 
 # Simpan file hasil
 df.to_csv('sentiment_with_labels.csv', index=False)
