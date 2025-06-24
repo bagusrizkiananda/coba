@@ -1,38 +1,35 @@
-import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
 
 # Load data
-uploaded_file = 'sentiment_analysis_results.csv'
-df = pd.read_csv(uploaded_file)
+file_path = 'sentiment_analysis_results.csv'
+df = pd.read_csv(file_path)
 
-# Pastikan kolom yang digunakan benar
-if 'sentiment_label' not in df.columns:
-    st.error("Kolom 'sentiment_label' tidak ditemukan dalam file CSV.")
-else:
-    st.title("Sentiment Distribution")
+# Lexicon yang Anda berikan
+sentiment_lexicon = {
+    'bagus': 1, 'baik': 1, 'suka': 1, 'cinta': 1, 'menarik': 1, 'seru': 1,
+    'hebat': 1, 'lucu': 1, 'tertawa': 1, 'senang': 1, 'puas': 1, 'rekomen': 1,
+    'keren': 1, 'mantap': 1, 'favorit': 1, 'amazing': 1, 'brilian': 1,
+    'jelek': -1, 'buruk': -1, 'tidak suka': -1, 'benci': -1, 'bosan': -1,
+    'kecewa': -1, 'menyesal': -1, 'buruk sekali': -1, 'membosankan': -1,
+    'tidak sangat': -1
+}
 
-    # Hitung distribusi sentimen
-    sentiment_counts = df['sentiment_label'].value_counts()
-
-    # Tampilkan tabel distribusi
-    st.subheader("Sentiment Counts")
-    st.write(sentiment_counts)
-
-    # Plot distribusi sentimen
-    fig, ax = plt.subplots()
-    ax.bar(sentiment_counts.index, sentiment_counts.values, color=['green', 'red'])
-    ax.set_xlabel('Sentiment')
-    ax.set_ylabel('Count')
-    ax.set_title('Sentiment Distribution')
-    st.pyplot(fig)
-
-    # Tambahkan opsi untuk filter
-    st.subheader("Filter Data berdasarkan Sentiment")
-    selected_sentiment = st.selectbox("Pilih Sentiment:", ['All'] + list(sentiment_counts.index))
-
-    if selected_sentiment != 'All':
-        filtered_df = df[df['sentiment_label'] == selected_sentiment]
-        st.write(filtered_df)
+# Fungsi sederhana untuk analisis sentimen
+def analyze_sentiment(text):
+    score = 0
+    for word in text.split():
+        if word in sentiment_lexicon:
+            score += sentiment_lexicon[word]
+    if score > 0:
+        return 'positive'
+    elif score < 0:
+        return 'negative'
     else:
-        st.write(df)
+        return 'neutral'
+
+# Terapkan ke data
+df['sentiment_label'] = df['normalized_text'].apply(analyze_sentiment)
+
+# Simpan file hasil
+df.to_csv('sentiment_with_labels.csv', index=False)
+print('File berhasil disimpan dengan label sentimen.')
