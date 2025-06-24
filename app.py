@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Load data
-uploaded_file = '/mnt/data/sentiment_analysis_results.csv'
+uploaded_file = 'sentiment_analysis_results.csv'
 df = pd.read_csv(uploaded_file)
 
 # Pastikan kolom yang digunakan benar
